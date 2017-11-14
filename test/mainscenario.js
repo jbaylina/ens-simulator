@@ -12,6 +12,8 @@ const setName = require('../js/enstools').setName;
 const getContent = require('../js/enstools').getContent;
 const setContent = require('../js/enstools').setContent;
 const claimEthDomain = require('../js/enstools').claimEthDomain;
+const setProxyInterface = require('../js/enstools').setProxyInterface;
+const getProxyInterface = require('../js/enstools').getProxyInterface;
 
 const assert = chai.assert;
 const { utils } = Web3;
@@ -78,5 +80,21 @@ describe('ENS Simulator', () => {
     const name = await getName(ens, accounts[0]);
 
     assert.equal(name, 'example.eth');
+  }).timeout(8000);
+
+  it('should register a IFace for an address', async () => {
+    await setProxyInterface(ens, accounts[0], 'Interface', accounts[1]);
+
+    const proxyAddr = await getProxyInterface(ens, accounts[0], 'Interface');
+
+    assert.equal(proxyAddr, accounts[1]);
+  }).timeout(8000);
+
+  it('should reassign a different IFace for an address', async () => {
+    await setProxyInterface(ens, accounts[0], 'Interface', accounts[2]);
+
+    const proxyAddr = await getProxyInterface(ens, accounts[0], 'Interface');
+
+    assert.equal(proxyAddr, accounts[2]);
   }).timeout(8000);
 });

@@ -111,6 +111,59 @@ const claimEthDomain = async (ens, name, owner) => {
     { from: owner, gas: 4000000 });
 };
 
+const setProxyInterface = async (ens, addr, iface, proxy) => {
+  const web3 = ens.$web3;
+  const reverseRegistrarAddr = await ens.owner(namehash(web3, 'addr.reverse'));
+
+  const reverseRegistrar = new ReverseRegistrar(web3, reverseRegistrarAddr);
+
+  const resolverAddr = await getAddr(ens, 'resolver.eth');
+  const resolver = new PublicResolver(web3, resolverAddr);
+
+  let a = addr.toLowerCase();
+  if (a.substr(0, 2) === '0x') a = a.substr(2);
+
+  const addrNode = namehash(web3, `${a}.addr.reverse`);
+  const ownerAddr = await ens.owner(addrNode);
+
+  if (ownerAddr !== addr) {
+    await reverseRegistrar.claim(addr, { from: addr, gas: 200000 });
+  }
+
+  const ifaceNode = namehash(web3, `${iface}.${a}.addr.reverse`);
+  const ownerIface = await ens.owner(ifaceNode);
+  if (ownerIface !== addr) {
+    await ens.setSubnodeOwner(
+      addrNode,
+      web3.utils.sha3(iface),
+      addr,
+      { from: addr, gas: 200000 });
+  }
+
+  const resolverIfaceAddr = await ens.resolver(ifaceNode);
+  if (resolverIfaceAddr !== resolver.$address) {
+    await ens.setResolver(
+      ifaceNode,
+      resolver.$address,
+      { from: addr, gas: 200000 });
+  }
+
+  const currentProxyAddr = await resolver.addr(ifaceNode);
+  if (currentProxyAddr !== proxy) {
+    await resolver.setAddr(
+      ifaceNode,
+      proxy,
+      { from: addr, gas: 200000 });
+  }
+};
+
+const getProxyInterface = async (ens, addr, iface) => {
+  let a = addr.toLowerCase();
+  if (a.substr(0, 2) === '0x') a = a.substr(2);
+
+  const proxy = await getAddr(ens, `${iface}.${a}.addr.reverse`);
+  return proxy;
+};
 
 module.exports.claimEthDomain = claimEthDomain;
 module.exports.namehash = namehash;
@@ -120,3 +173,5 @@ module.exports.getName = getName;
 module.exports.setName = setName;
 module.exports.getContent = getContent;
 module.exports.setContent = setContent;
+module.exports.getProxyInterface = getProxyInterface;
+module.exports.setProxyInterface = setProxyInterface;

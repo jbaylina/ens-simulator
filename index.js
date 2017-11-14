@@ -16,7 +16,8 @@ module.exports.getName = enstools.getName;
 module.exports.setName = enstools.setName;
 module.exports.getContent = enstools.getContent;
 module.exports.setContent = enstools.setContent;
-
+module.exports.getProxyInterface = enstools.getProxyInterface;
+module.exports.setProxyInterface = enstools.setProxyInterface;
 const namehash = enstools.namehash;
 
 module.exports.deployENSSimulator = async (web3) => {

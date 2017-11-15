@@ -27,7 +27,7 @@ module.exports.deployENSSimulator = async (web3) => {
   await web3.eth.sendTransaction({
     from: accounts[0],
     to: deployAccount.address,
-    value: web3.utils.toWei(1),
+    value: web3.utils.toWei('1'),
   });
 
   await web3.eth.personal.importRawKey(rawKey, '');
